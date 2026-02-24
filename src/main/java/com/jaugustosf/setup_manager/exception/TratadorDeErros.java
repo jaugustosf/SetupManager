@@ -40,15 +40,23 @@ public class TratadorDeErros {
     }
 
     @ExceptionHandler(RegistoNaoEncontradoException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND) // 2. Força o retorno do Status 404 (Not Found)!
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> lidarComRegistoNaoEncontrado(RegistoNaoEncontradoException ex) {
 
-        // Criamos o nosso dicionário (Map) para gerar o JSON
         Map<String, String> erroFormatado = new HashMap<>();
 
-        // Colocamos a chave "mensagem" e extraímos o texto que escrevemos lá no Service
+        // Pegamos a mensagem que o Service escreveu e colocamos no JSON
         erroFormatado.put("mensagem", ex.getMessage());
+        erroFormatado.put("status", "404 Not Found"); // Você pode até adicionar mais campos se quiser!
 
+        return erroFormatado;
+    }
+
+    @ExceptionHandler(RegraDeNegocioException.class)
+    @ResponseStatus(HttpStatus.CONFLICT) // Status 409: "O que você quer fazer gera um conflito com o que já tenho aqui!"
+    public Map<String, String> lidarComRegraDeNegocio(RegraDeNegocioException ex) {
+        Map<String, String> erroFormatado = new HashMap<>();
+        erroFormatado.put("erro_de_negocio", ex.getMessage());
         return erroFormatado;
     }
 }

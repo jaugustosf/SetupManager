@@ -1,25 +1,41 @@
 package com.jaugustosf.setup_manager.service;
 
 import com.jaugustosf.setup_manager.exception.RegistoNaoEncontradoException;
+import com.jaugustosf.setup_manager.exception.RegraDeNegocioException;
 import com.jaugustosf.setup_manager.model.Equipamento;
 import com.jaugustosf.setup_manager.repository.EquipamentoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
-// O @Service avisa o Spring: "Esta classe guarda as regras de negócio importantes!"
 @Service
 public class EquipamentoService {
 
-    // O Service é quem manda no banco de dados (Repository) agora.
     @Autowired
     private EquipamentoRepository repository;
 
     public Equipamento salvar(Equipamento equipamento) {
-        // No futuro, é AQUI dentro que colocaremos os "if/else" de validação pesada.
-        // Por exemplo: consultar se o nome já existe antes de mandar o repository.save()
+        Optional<Equipamento> equipamentoExistente = repository.findByNome(equipamento.getNome());
+
+        if (equipamentoExistente.isPresent()) {
+            throw new RegraDeNegocioException("Já existe um equipamento cadastrado com o nome: " + equipamento.getNome());
+        }
+
         return repository.save(equipamento);
+    }
+
+    public List<Equipamento> salvarLote(List<Equipamento> equipamentos) {
+        for (Equipamento eq : equipamentos) {
+            Optional<Equipamento> equipamentoExistente = repository.findByNome(eq.getNome());
+
+            if (equipamentoExistente.isPresent()) {
+                throw new RegraDeNegocioException("Já existe um equipamento cadastrado com o nome: " + eq.getNome());
+            }
+        }
+
+        return repository.saveAll(equipamentos);
     }
 
     public List<Equipamento> listarTodos() {
@@ -27,10 +43,7 @@ public class EquipamentoService {
     }
 
     public Equipamento buscarPorId(Long id) {
-        // O metodo findById() devolve um "Optional" (uma caixa que pode ou não conter o equipamento).
-        return repository.findById(id)
-                // Se a caixa estiver vazia, lançamos o nosso erro personalizado!
-                .orElseThrow(() -> new RegistoNaoEncontradoException("O equipamento com o ID " + id + " não existe no seu setup."));
+        return repository.findById(id).orElseThrow(() -> new RegistoNaoEncontradoException("O equipamento com o ID " + id + " não existe no seu setup."));
     }
 
     public void deleteById(Long id) {

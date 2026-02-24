@@ -1,27 +1,55 @@
 package com.jaugustosf.setup_manager.controller;
 
 import com.jaugustosf.setup_manager.model.Equipamento;
-// Repare que não importamos mais o Repository aqui, e sim o Service!
 import com.jaugustosf.setup_manager.service.EquipamentoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import com.jaugustosf.setup_manager.dto.EquipamentoRequestDTO;
+import com.jaugustosf.setup_manager.dto.EquipamentoResponseDTO;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/equipamentos")
 public class EquipamentoController {
-    // A Recepcionista (Controller) chama o Gerente (Service)
+
     @Autowired
     private EquipamentoService service;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Equipamento cadastrarEquipamento(@Valid @RequestBody Equipamento novoEquipamento) {
-        // O Controller não sabe mais como salva. Ele só passa o objeto para frente.
-        return service.salvar(novoEquipamento);
+    // 1. Mudamos a porta de entrada: Agora recebemos o RequestDTO em vez da Entidade
+    public EquipamentoResponseDTO cadastrarEquipamento(@Valid @RequestBody EquipamentoRequestDTO requestDTO) {
+        // 2. Convertemos o Dublê (DTO) no Ator Real (Entidade)
+        Equipamento novoEquipamento = requestDTO.converterParaEntidade();
+
+        // 3. O Service continua esperando uma Entidade para salvar no banco
+        Equipamento equipamentoSalvo = service.salvar(novoEquipamento);
+
+        // 4. Devolvemos o Dublê de Saída (ResponseDTO) para esconder o ID e dados sensíveis!
+        return new EquipamentoResponseDTO(equipamentoSalvo);
+    }
+
+    @PostMapping("/batch") // Pode manter apenas @PostMapping se você apagou o de cadastro individual, ou @PostMapping("/lote") se quiser ter os dois
+    @ResponseStatus(HttpStatus.CREATED)
+    // CORREÇÃO 1: A porta de entrada recebe uma lista de REQUEST_DTO (A entrada válida)
+    public List<EquipamentoResponseDTO> cadastrarEmLote(@Valid @RequestBody List<EquipamentoRequestDTO> requestDTO) {
+
+        // Agora o Java acha o metodo, porque requestDTO é do tipo certo!
+        List<Equipamento> novosEquipamentos = requestDTO.stream()
+                .map(dto -> dto.converterParaEntidade())
+                .toList();
+
+        // CORREÇÃO 2: Usamos o método salvarVarios() do Service, que aceita uma Lista inteira!
+        List<Equipamento> equipamentosSalvos = service.salvarLote(novosEquipamentos);
+
+        // O seu retorno estava perfeito!
+        return equipamentosSalvos.stream()
+                .map(entidade -> new EquipamentoResponseDTO(entidade))
+                .toList();
     }
 
     @GetMapping
@@ -34,25 +62,15 @@ public class EquipamentoController {
         return service.buscarPorId(id);
     }
 
-    // O PUT serve para ATUALIZAR um registro inteiro.
-    // Note o {id} na URL. O cliente precisa avisar QUAL equipamento quer alterar.
     @PutMapping("/{id}")
     public Equipamento atualizarEquipamento(@Valid @PathVariable Long id, @RequestBody Equipamento equipamentoAtualizado) {
-        // 1. O Spring pega o ID da URL (@PathVariable) e o JSON do corpo (@RequestBody)
-        // 2. Nós garantimos que o ID do objeto Java seja o mesmo da URL, para não atualizar o item errado.
         equipamentoAtualizado.setId(id);
-
-        // 3. O metodo .save() do Repositório é inteligente.
-        // Se o ID não existir, ele faz um INSERT. Se o ID já existir, ele faz um UPDATE automático no SQL!
         return service.salvar(equipamentoAtualizado);
     }
 
-    // O DELETE serve para APAGAR.
-    // Ele só precisa do ID na URL. Não enviamos JSON no corpo (Body).
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT) // Retorna o Status 204 (Deu certo e não tenho conteúdo para devolver)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void apagarEquipamento(@PathVariable Long id) {
-        // O metodo .deleteById() vai gerar um comando: DELETE FROM equipamento WHERE id = ?
         service.deleteById(id);
     }
 }
