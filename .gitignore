@@ -35,3 +35,8 @@ build/
 data/
 *.db
 *.trace.db
+
+#Ignora os arquivos de propriedades reais
+**/application.properties
+#permite os arquivos de exemplo
+!**/application.properties.example

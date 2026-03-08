@@ -1,0 +1,23 @@
+# Exemplo de configuração da aplicação
+# RENOMEIE este arquivo para application.properties e configure com seus dados reais
+
+# Configurações do Servidor
+server.port=8080
+
+# Configurações do Banco de Dados
+# Exemplo genérico (ajuste a URL, driver, usuário e senha conforme seu ambiente)
+spring.datasource.url=jdbc:h2:mem:setupmanager
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=seu_usuario
+spring.datasource.password=sua_senha
+
+# Configurações do JPA / Hibernate
+spring.jpa.show-sql=true
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.format_sql=true
+# Ajuste o dialeto conforme o banco utilizado (ex: org.hibernate.dialect.MySQLDialect)
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+
+# Console H2 (apenas para desenvolvimento com H2)
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
