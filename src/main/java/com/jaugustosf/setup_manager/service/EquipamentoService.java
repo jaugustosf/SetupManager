@@ -38,6 +38,13 @@ public class EquipamentoService {
         return repository.saveAll(equipamentos);
     }
 
+    public List<Equipamento> listByCategory(String categoria){
+        if (categoria != null){
+            return repository.findByCategoriaIgnoreCase(categoria);
+        }
+        return repository.findAll();
+    }
+
     public List<Equipamento> listarTodos() {
         return repository.findAll();
     }

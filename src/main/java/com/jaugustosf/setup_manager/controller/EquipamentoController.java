@@ -40,26 +40,32 @@ public class EquipamentoController {
 
         // Agora o Java acha o metodo, porque requestDTO é do tipo certo!
         List<Equipamento> novosEquipamentos = requestDTO.stream()
-                .map(dto -> dto.converterParaEntidade())
+                .map(EquipamentoRequestDTO::converterParaEntidade)
                 .toList();
 
-        // CORREÇÃO 2: Usamos o método salvarVarios() do Service, que aceita uma Lista inteira!
+        // CORREÇÃO 2: Usamos o metodo salvarVarios() do Service, que aceita uma Lista inteira!
         List<Equipamento> equipamentosSalvos = service.salvarLote(novosEquipamentos);
 
         // O seu retorno estava perfeito!
         return equipamentosSalvos.stream()
-                .map(entidade -> new EquipamentoResponseDTO(entidade))
+                .map(EquipamentoResponseDTO::new)
                 .toList();
-    }
-
-    @GetMapping
-    public List<Equipamento> listarEquipamentos() {
-        return service.listarTodos();
     }
 
     @GetMapping("/{id}")
     public Equipamento buscarEquipamentoPorId(@PathVariable Long id) {
         return service.buscarPorId(id);
+    }
+
+    @GetMapping
+    public List<EquipamentoResponseDTO> listar(@RequestParam(required = false) String categoria) {
+        // 1. O Service decide o que buscar
+        List<Equipamento> lista = service.listByCategory(categoria);
+
+        // 2. Transformamos a lista de Entidades em DTOs (usando a nossa esteira/stream)
+        return lista.stream()
+                .map(EquipamentoResponseDTO::new) // Atalho para: e -> new EquipamentoResponseDTO(e)
+                .toList();
     }
 
     @PutMapping("/{id}")

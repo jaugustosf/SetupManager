@@ -17,6 +17,11 @@ public class Equipamento {
 
     public Equipamento() {}
 
+    public Equipamento(String nome, String categoria) {
+        this.nome = nome;
+        this.categoria = categoria;
+    }
+
     public Equipamento(Long id, String nome, String categoria) {
         this.id = id;
         this.nome = nome;
