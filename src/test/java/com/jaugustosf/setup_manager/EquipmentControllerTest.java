@@ -14,37 +14,37 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class EquipamentoControllerTest {
+class EquipmentControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
-    @DisplayName("Deve retornar 200 ao buscar um equipamento existente")
-    void buscarSucesso() throws Exception {
-        // Como o DBSeeder já inseriu dados, o ID 1 deve existir
-        mockMvc.perform(get("/equipamentos/1"))
+    @DisplayName("Should return 200 when searching for an existing equipment")
+    void searchSuccess() throws Exception {
+        // Assuming DBSeeder has inserted data, ID 1 should exist
+        mockMvc.perform(get("/equipments/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nome").value("VXE R1 Pro"));
+                .andExpect(jsonPath("$.name").value("VXE R1 Pro"));
     }
 
     @Test
-    @DisplayName("Deve retornar 404 e nossa mensagem customizada ao buscar ID inexistente")
-    void buscarErro404() throws Exception {
-        mockMvc.perform(get("/equipamentos/999"))
+    @DisplayName("Should return 404 and our custom message when searching for non-existent ID")
+    void searchError404() throws Exception {
+        mockMvc.perform(get("/equipments/999"))
                 .andExpect(status().isNotFound())
-                // Validamos se o nosso TratadorDeErros está funcionando!
-                .andExpect(jsonPath("$.mensagem").exists());
+                // Validating if our GlobalExceptionHandler is working!
+                .andExpect(jsonPath("$.message").exists());
     }
 
     @Test
-    @DisplayName("Deve retornar 400 ao tentar cadastrar equipamento sem nome")
-    void cadastrarErroValidacao() throws Exception {
-        String jsonInvalido = "{\"nome\": \"\", \"categoria\": \"Teste\"}";
+    @DisplayName("Should return 400 when trying to register equipment without name")
+    void registerValidationError() throws Exception {
+        String invalidJson = "{\"name\": \"\", \"category\": \"Test\"}";
 
-        mockMvc.perform(post("/equipamentos")
+        mockMvc.perform(post("/equipments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonInvalido))
+                        .content(invalidJson))
                 .andExpect(status().isBadRequest());
     }
 }
