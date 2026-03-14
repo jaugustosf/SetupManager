@@ -4,6 +4,9 @@ import com.jaugustosf.setup_manager.model.Equipment;
 import com.jaugustosf.setup_manager.service.EquipmentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,11 +48,11 @@ public class EquipmentController {
     }
 
     @GetMapping
-    public List<EquipmentResponseDTO> listEquipments(@RequestParam(required = false) String category) {
-        List<Equipment> list = service.listByCategory(category);
-        return list.stream()
-                .map(EquipmentResponseDTO::new)
-                .toList();
+    public Page<EquipmentResponseDTO> listEquipment(
+            @RequestParam(required = false) String category,
+            @PageableDefault(size = 10, page = 0) Pageable pageable) {
+        Page<Equipment> list = service.listEquipment(category, pageable);
+        return list.map(EquipmentResponseDTO::new);
     }
 
     @PutMapping("/{id}")

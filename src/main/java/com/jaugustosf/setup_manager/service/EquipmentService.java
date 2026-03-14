@@ -5,6 +5,8 @@ import com.jaugustosf.setup_manager.exception.BusinessRuleException;
 import com.jaugustosf.setup_manager.model.Equipment;
 import com.jaugustosf.setup_manager.repository.EquipmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,15 +40,11 @@ public class EquipmentService {
         return repository.saveAll(equipments);
     }
 
-    public List<Equipment> listByCategory(String category){
+    public Page<Equipment> listEquipment(String category, Pageable pageable){
         if (category != null){
-            return repository.findByCategoryIgnoreCase(category);
+            return repository.findByCategoryIgnoreCase(category, pageable);
         }
-        return repository.findAll();
-    }
-
-    public List<Equipment> listAll() {
-        return repository.findAll();
+        return repository.findAll(pageable);
     }
 
     public Equipment findById(Long id) {
