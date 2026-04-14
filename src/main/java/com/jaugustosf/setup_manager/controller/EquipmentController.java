@@ -3,6 +3,7 @@ package com.jaugustosf.setup_manager.controller;
 import com.jaugustosf.setup_manager.model.Equipment;
 import com.jaugustosf.setup_manager.service.EquipmentService;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +17,7 @@ import com.jaugustosf.setup_manager.dto.EquipmentResponseDTO;
 import java.util.List;
 
 @RestController
-@RequestMapping("/equipments")
+@RequestMapping("/equipment")
 public class EquipmentController {
 
     @Autowired
@@ -30,9 +31,9 @@ public class EquipmentController {
         return new EquipmentResponseDTO(savedEquipment);
     }
 
-    @PostMapping("/bulk")
+    @PostMapping("/batch")
     @ResponseStatus(HttpStatus.CREATED)
-    public List<EquipmentResponseDTO> bulkInsert(@Valid @RequestBody List<EquipmentRequestDTO> requestDTO) {
+    public List<EquipmentResponseDTO> batchInsert(@Valid @RequestBody List<EquipmentRequestDTO> requestDTO) {
         List<Equipment> newEquipments = requestDTO.stream()
                 .map(EquipmentRequestDTO::convertToEntity)
                 .toList();
@@ -49,9 +50,10 @@ public class EquipmentController {
 
     @GetMapping
     public Page<EquipmentResponseDTO> listEquipment(
+            @RequestParam(required = false) String name,
             @RequestParam(required = false) String category,
-            @PageableDefault(size = 10, page = 0) Pageable pageable) {
-        Page<Equipment> list = service.listEquipment(category, pageable);
+            @ParameterObject @PageableDefault(size = 10, page = 0) Pageable pageable) { //Using ParameterObject because SpringDoc try doc all Pageable interface.
+        Page<Equipment> list = service.listEquipment(name, category, pageable);
         return list.map(EquipmentResponseDTO::new);
     }
 

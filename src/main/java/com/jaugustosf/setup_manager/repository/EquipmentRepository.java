@@ -10,5 +10,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EquipmentRepository extends JpaRepository<Equipment, Long> {
     Optional<Equipment> findByName(String name);
+    Page<Equipment> findByNameContainingIgnoreCase(String name, Pageable pageable);
     Page<Equipment> findByCategoryIgnoreCase(String category, Pageable pageable);
 }

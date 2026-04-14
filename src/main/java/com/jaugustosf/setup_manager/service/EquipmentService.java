@@ -40,7 +40,10 @@ public class EquipmentService {
         return repository.saveAll(equipments);
     }
 
-    public Page<Equipment> listEquipment(String category, Pageable pageable){
+    public Page<Equipment> listEquipment(String name, String category, Pageable pageable){
+        if (name != null) {
+            return repository.findByNameContainingIgnoreCase(name, pageable);
+        }
         if (category != null){
             return repository.findByCategoryIgnoreCase(category, pageable);
         }
